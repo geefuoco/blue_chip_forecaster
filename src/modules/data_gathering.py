@@ -2,6 +2,7 @@ import pandas as pd
 import pandas_datareader.data as reader
 from datetime import datetime, timedelta
 import os
+import subprocess
 
 
 _DATA_PATH = os.path.join(os.path.dirname(__file__), "../../data/")
@@ -42,16 +43,15 @@ def _update_current_data(ticker: str):
     if not os.path.exists(path):
         raise FileNotFoundError(f"Could not find data file in {path}")
 
-    today = datetime.today().strftime("%Y-%m-%d")
-    df = pd.read_csv(path)
-    last_observation = df.tail(1)
-    old_date = last_observation["Date"].values[0]
+    old_date = subprocess.check_output([f"tail -1 {path} | cut -d, -f1"], shell=True)
+    old_date = old_date.decode("utf-8").rstrip()
+    old_date = datetime.strptime(old_date, "%Y-%m-%d").date()
 
-    if old_date == today:
+    if not _valid_time_to_update(old_date):
         print("Data is up to date")
         return
 
-    start = datetime.strptime(old_date, "%Y-%m-%d") + timedelta(1)
+    start = old_date + timedelta(1)
     observation = _query_stock_data(ticker, start=start)
 
     if observation is not None:
@@ -60,13 +60,24 @@ def _update_current_data(ticker: str):
         print(f"Successfully updated {ticker}.csv")
 
 
+def _valid_time_to_update(old_date: datetime):
+    today = datetime.today()
+    today_date = today.date()
+    today_market_close = datetime.strptime(
+        today.strftime("%Y-%m-%d") + " 16", "%Y-%m-%d %H"
+    )
+    weekday = int(today.strftime("%w"))
+    # Not the same day and the market has closed and its not weekend
+    return (
+        old_date < today_date and today >= today_market_close and weekday in range(1, 6)
+    )
+
+
 def _generate_file_path(ticker: str):
-    return _DATA_PATH + f"/{ticker}" + ".csv"
+    return _DATA_PATH + f"{ticker}" + ".csv"
 
 
-def _query_stock_data(ticker: str,
-                      start=datetime(1980, 1, 1),
-                      source="yahoo"):
+def _query_stock_data(ticker: str, start=datetime(1980, 1, 1), source="yahoo"):
     """
     Returns historical stock data as a pandas Dataframe for given
     ticker from start date to today
@@ -78,10 +89,7 @@ def _query_stock_data(ticker: str,
     """
     today = datetime.today()
     try:
-        stock = reader.DataReader(ticker,
-                                  start=start,
-                                  end=today,
-                                  data_source=source)
+        stock = reader.DataReader(ticker, start=start, end=today, data_source=source)
         return stock
     except KeyError:
         print(f"Could not find ticker symbol: {ticker}")
