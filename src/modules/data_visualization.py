@@ -24,6 +24,16 @@ def plot_stock(df, start: date = None):
     ax.tick_params(axis="x", labelrotation=45)
     if start is not None:
         ax.set_xlim(start, df["Date"].max())
-    sns.lineplot(ax=ax, data=df, x=df["Date"], y="Close")
+    sns.lineplot(ax=ax, data=df, x="Date", y="Close")
 
+    plt.show()
+
+
+def plot_forecast(df, m):
+    """
+    Draws a plot of the forecast made from a Prophet object
+
+    df\tForecast Dataframe from Prophet
+    """
+    m.plot(df)
     plt.show()
