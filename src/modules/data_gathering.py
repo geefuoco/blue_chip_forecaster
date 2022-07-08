@@ -28,6 +28,7 @@ def get_stock_data(ticker: str, force=False):
             print("Querying data")
             df = _query_stock_data(ticker)
             if df is not None:
+                df["Date"] = pd.to_datetime(df["Date"])
                 df.to_csv(path)
                 return df
 
@@ -55,6 +56,7 @@ def _update_current_data(ticker: str):
     observation = _query_stock_data(ticker, start=start)
 
     if observation is not None:
+        df = pd.read_csv(path)
         df = pd.concat(df, observation, axis=0)
         df.to_csv(path)
         print(f"Successfully updated {ticker}.csv")
