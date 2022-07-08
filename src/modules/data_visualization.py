@@ -9,6 +9,12 @@ sns.set_theme(style="darkgrid", context="talk")
 
 
 def plot_stock(df, start: date = None):
+    """
+    Draws a plot of the provided stock dataframe
+    Dateframe must contain columns ["Date", "Close"]
+
+    start: date\tThe date which the x axis should start from
+    """
     df["Date"] = to_datetime(df["Date"]).dt.to_pydatetime()
     locator = YearLocator(3)
     formatter = ConciseDateFormatter(locator)
