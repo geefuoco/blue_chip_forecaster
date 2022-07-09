@@ -15,5 +15,6 @@ def forecast_prophet(df, num_days=1):
     m.fit(data)
 
     future = m.make_future_dataframe(periods=num_days)
+    future = future[future["ds"].dt.dayofweek < 5]
     forecast = m.predict(future)
     return forecast, m
