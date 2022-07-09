@@ -20,7 +20,7 @@ def get_stock_data(ticker: str, force=False):
     path = _generate_file_path(ticker)
     if os.path.exists(path):
         _update_current_data(ticker)
-        return pd.read_csv(path)
+        return pd.read_csv(path, parse_dates=["Date"])
     else:
         print(f"Could not find {ticker}.csv inside of data folder at {path}")
 
@@ -28,8 +28,8 @@ def get_stock_data(ticker: str, force=False):
             print("Querying data")
             df = _query_stock_data(ticker)
             if df is not None:
-                df["Date"] = pd.to_datetime(df["Date"])
-                df.to_csv(path)
+                df = df.reset_index()
+                df.to_csv(path, index=False)
                 return df
 
 
