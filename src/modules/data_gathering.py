@@ -1,11 +1,66 @@
 import pandas as pd
 import pandas_datareader.data as reader
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import os
 import subprocess
 
-
 _DATA_PATH = os.path.join(os.path.dirname(__file__), "../../data/")
+
+
+def get_headlines_data(crawler):
+    """
+    Returns the headlines dataframe up to date for today
+
+    crawler: WSJCrawler\tCrawler to grab data if it needs to be updated
+    """
+    path = _DATA_PATH + "headlines_data/headlines_data.csv"
+    if not os.path.exists(path):
+        print("Could not find headlines data. Consider using WSJCrawler")
+        return
+    df = pd.read_csv(path)
+
+    df = _update_headlines_data(df, crawler)
+    return df
+
+
+def _update_headlines_data(df: pd.DataFrame, crawler):
+    """
+    Updates the provided dataframe with the latest WSJ Headlines
+
+    df: pd.Dataframe of headlines data
+    crawler: WSJCrawler\tCrawler to crawl WSJ
+    """
+    latest = pd.to_datetime(df["date"].max()).date() 
+    today = date.today()
+    
+    if latest < today:
+        print("Fetching latest headlines...")
+        try:
+            crawler.crawl(latest + timedelta(1), today)
+        except Exception:
+            print("Error while grabbing latest headlines")
+            return
+        name = today.strftime("%Y-%m-%d") + "_headlines.csv"
+        crawler.save_headlines(name)
+        new_df = pd.read_csv(_DATA_PATH + f"wsj_archive/{name}")
+        new_df = _transform_to_headlines_df(new_df)
+        df = pd.concat((df, new_df))
+        df.to_csv(_DATA_PATH + "headlines_data/headlines_data.csv", index=False)
+        print("Headlines data updated")
+    return df
+
+
+def _transform_to_headlines_df(df: pd.DataFrame):
+    """
+    Returns a new dataframe that is the same format as a headlines dataframe
+    
+    df: pd.DataFrame\tThe dataframe to transform
+    """
+    new_df = df
+    new_df = new_df.T.reset_index().rename(columns={"index": "date"})
+    new_df.columns = [str(c) for c in new_df.columns]
+    return new_df
+    
 
 
 def get_stock_data(ticker: str, force=False):
