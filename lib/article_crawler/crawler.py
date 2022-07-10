@@ -7,7 +7,7 @@ from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 from bs4 import BeautifulSoup
 
-DATA_PATH = path.join(path.dirname(__file__), "../../data")
+DATA_PATH = path.join(path.dirname(__file__), "../../data/wsj_archive/")
 WEB_DRIVER = getenv("WEB_DRIVER")
 _driver_service = Service(WEB_DRIVER)
 _options = Options()
