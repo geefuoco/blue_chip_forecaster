@@ -1,2 +1,2 @@
 # blue_chip_forecaster
-A model buit to forecast blue chip stocks
+A model built to forecast blue chip stocks
