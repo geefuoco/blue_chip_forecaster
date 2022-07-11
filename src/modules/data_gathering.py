@@ -30,9 +30,9 @@ def _update_headlines_data(df: pd.DataFrame, crawler):
     df: pd.Dataframe of headlines data
     crawler: WSJCrawler\tCrawler to crawl WSJ
     """
-    latest = pd.to_datetime(df["date"].max()).date() 
+    latest = pd.to_datetime(df["date"].max()).date()
     today = date.today()
-    
+
     if latest < today:
         print("Fetching latest headlines...")
         try:
@@ -53,14 +53,12 @@ def _update_headlines_data(df: pd.DataFrame, crawler):
 def _transform_to_headlines_df(df: pd.DataFrame):
     """
     Returns a new dataframe that is the same format as a headlines dataframe
-    
     df: pd.DataFrame\tThe dataframe to transform
     """
     new_df = df
     new_df = new_df.T.reset_index().rename(columns={"index": "date"})
     new_df.columns = [str(c) for c in new_df.columns]
     return new_df
-    
 
 
 def get_stock_data(ticker: str, force=False):
