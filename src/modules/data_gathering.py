@@ -73,7 +73,7 @@ def get_stock_data(ticker: str, force=False):
     path = _generate_file_path(ticker)
     if os.path.exists(path):
         _update_current_data(ticker)
-        return pd.read_csv(path, parse_dates=["Date"])
+        return pd.read_csv(path)
     else:
         print(f"Could not find {ticker}.csv inside of data folder at {path}")
 
@@ -99,7 +99,7 @@ def _update_current_data(ticker: str):
 
     old_date = subprocess.check_output([f"tail -1 {path} | cut -d, -f1"], shell=True)
     old_date = old_date.decode("utf-8").rstrip()
-    old_date = datetime.strptime(old_date, "%Y-%m-%d").date()
+    old_date = datetime.strptime(old_date, "%Y-%m-%d %H:%M:%S").date()
 
     if not _valid_time_to_update(old_date):
         print("Data is up to date")
@@ -110,8 +110,8 @@ def _update_current_data(ticker: str):
 
     if observation is not None:
         df = pd.read_csv(path)
-        df = pd.concat(df, observation, axis=0)
-        df.to_csv(path)
+        df = pd.concat((df, observation), axis=0)
+        df.to_csv(path, index=False)
         print(f"Successfully updated {ticker}.csv")
 
 
