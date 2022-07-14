@@ -3,6 +3,12 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 # Not including senntiment analysis for now since it always reports sentiment as neutral
+def train_test_split(X, y, train_size=0.8):
+    assert len(X) == len(y)
+    size = int(len(X) * train_size)
+    X_train, X_test = X[:size, :], X[size:, :]
+    y_train, y_test = y[:size], y[size:]
+    return X_train, y_train, X_test, y_test
 
 
 class Preprocessor:
@@ -40,6 +46,15 @@ class Preprocessor:
             y_scaled = self._y_scaler.fit_transform(y)
         X_scaled = self._x_scaler.fit_transform(X)
         return X_scaled, y_scaled
+
+    def unscale_target(self, y):
+        """
+        Unscales data
+
+        y: np.array
+        returns: np.array
+        """
+        return self._y_scaler.inverse_transform(y)
 
     def create_50_ema(self, X: pd.DataFrame, columns: list[str]):
         """
