@@ -2,10 +2,11 @@ import alpaca_trade_api as trade_api
 from dotenv import load_dotenv
 import os
 
-load_dotenv(os.path.join(__file__, "../../.env"))
+path = os.path.join(os.path.dirname(__file__), "../../.env")
+load_dotenv(path)
 
-API_KEY = os.getenv("API_KEY")
-API_SECRET = os.getenv("API_SECRET")
+API_KEY = os.getenv("APCA_API_KEY_ID")
+API_SECRET = os.getenv("APCA_API_SECRET_KEY")
 URL = "https://paper-api.alpaca.markets"
 
 alpaca = trade_api.REST(API_KEY, API_SECRET, URL, api_version="v2")
@@ -58,6 +59,22 @@ def get_order(order_id):
         return order
     except trade_api.rest.APIError:
         print("Could not retrieve orders")
+
+
+def get_position(ticker: str):
+    try:
+        position = alpaca.get_position(ticker)
+        return position
+    except trade_api.rest.APIError:
+        print("Could not find position")
+
+
+def view_positions():
+    try:
+        positions = alpaca.list_positions()
+        return positions
+    except trade_api.rest.APIError:
+        print("Could not find position")
 
 
 def get_account():
