@@ -2,6 +2,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.backend import clear_session
+import os
 
 
 def build_model(input_shape, verbose=1):
@@ -24,13 +25,19 @@ def build_model(input_shape, verbose=1):
     return model
 
 
-def fit_model(model, X_train, y_train, X_test, y_test):
+def fit_model(model, X_train, y_train, X_test, y_test, batch_size=256):
     history = model.fit(
         X_train,
         y_train,
         epochs=30,
-        batch_size=256,
+        batch_size=batch_size,
         validation_data=(X_test, y_test),
         callbacks=[EarlyStopping(patience=3)],
+        workers=2,
     )
     return history
+
+
+def save_model(model, name: str):
+    path = os.path.join(os.path.dirname(__file__), "../../data/model/")
+    model.save(path + name)
