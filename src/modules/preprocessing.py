@@ -34,6 +34,13 @@ class Preprocessor:
         x_scaled, y_scaled = self.scale(data, target)
         return x_scaled, y_scaled
 
+    def reshape(self, X):
+        """
+        Reshape data into format for LSTM
+        X: np.array
+        """
+        return X.reshape(X.shape[0], X.shape[1], 1)
+
     def scale(self, X, y=None):
         """
         Scales data with a min max scaler and returns it
