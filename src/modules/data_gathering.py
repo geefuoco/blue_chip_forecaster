@@ -3,6 +3,7 @@ import pandas_datareader.data as reader
 from datetime import datetime, timedelta, date
 import os
 import subprocess
+import traceback
 
 _DATA_PATH = os.path.join(os.path.dirname(__file__), "../../data/")
 
@@ -107,9 +108,11 @@ def _update_current_data(ticker: str):
 
     start = old_date + timedelta(1)
     observation = _query_stock_data(ticker, start=start)
-    observation = observation.reset_index()
+
 
     if observation is not None:
+        observation = observation.reset_index()
+        observation["Date"] = pd.to_datetime(observation["Date"]).dt.date
         df = pd.read_csv(path)
         df = pd.concat((df, observation), axis=0)
         df.to_csv(path, index=False)
@@ -152,3 +155,5 @@ def _query_stock_data(ticker: str, start=datetime(1980, 1, 1), source="yahoo"):
     except Exception:
         print(f"An error occured while looking for {ticker}")
         print("Please ensure that the ticker is real")
+        tb = traceback.format_exc()
+        print(tb)
